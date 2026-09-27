@@ -1,0 +1,5 @@
+finance-datareader
+pandas
+tqdm
+beautifulsoup4
+lxml
