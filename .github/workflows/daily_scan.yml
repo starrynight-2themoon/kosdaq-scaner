@@ -2,16 +2,22 @@ name: Daily KOSDAQ Scanner Update
 
 on:
   schedule:
-    # 평일(월~금) UTC 06:45 = 한국시간(KST) 오후 3시 45분 자동 실행
+    # 오후 3시 45분과 4시 15분 두 번 체크하여 깃허브 서버 누락 방지
     - cron: '45 6 * * 1-5'
-  workflow_dispatch: # 수동 실행 버튼 활성화
+    - cron: '15 7 * * 1-5'
+  workflow_dispatch:
 
 permissions:
-  contents: write # 생성된 index.html을 저장소에 자동 덮어쓰기 위한 권한
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: 1. 저장소 코드 불러오기
@@ -35,8 +41,20 @@ jobs:
           python jarvis_all_in_one.py
 
       - name: 5. 업데이트된 index.html 자동 커밋 및 푸시
+        env:
+          TZ: 'Asia/Seoul'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add index.html
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update KOSDAQ Scanner $(date +'%Y-%m-%d %H:%M')" && git push)
+
+      - name: 6. 웹페이지 배포 파일 패키징
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: 7. GitHub Pages 웹사이트 즉시 반영
+        id: deployment
+        uses: actions/deploy-pages@v4
