@@ -2,9 +2,9 @@ name: Daily KOSDAQ Scanner Update
 
 on:
   schedule:
-    # 평일 오후 3시 45분, 4시 15분(KST) 실행
-    - cron: '45 6 * * 1-5'
-    - cron: '15 7 * * 1-5'
+    # 평일 오후 3시 38분, 4시 12분(KST) 실행 - 정각/15분/45분 병목 회피
+    - cron: '38 6 * * 1-5'
+    - cron: '12 7 * * 1-5'
   workflow_dispatch:
 
 permissions:
